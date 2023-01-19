@@ -1,20 +1,34 @@
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, TextInput } from 'react-native-paper';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { Button } from 'react-native-paper';
-import { StatusBar } from 'expo-status-bar';
+import { useState } from 'react';
 
 export default function App() {
+
+  const [textItem, setTextItem] = useState('');
+  const [list, setList] = useState([]);
+
+  const OnHandleChangeItem = e => { setTextItem(e) };
+  
+  const AddToList = () => { setList( prevState => [...prevState, textItem] ), setTextItem("") };
+  
+  const OpenModule = () => {};
+
+
+
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
-        <TextInput placeholder='Escriba producto' style={styles.inputAddItem} />
-        <Button icon="playlist-check" mode="outlined" style={styles.ButtonAddItem} onPress={(e) =>
-          //agregar el valor de e a un array
-        {} }>Agregar
-        </Button>
+        <TextInput placeholder='Escriba producto' mode="flat" style={styles.inputAddItem} onChangeText={OnHandleChangeItem} value={textItem} />
+        <Button icon="playlist-check" mode="outlined" style={styles.ButtonAddItem} onPress={AddToList}></Button>
       </View >
       <View style={styles.listContainer}>
-
+        {list.map(item => (
+          <View style={styles.itemListContainer}>
+            <Text>{item}</Text>
+            <Button icon="lead-pencil" mode="" onPress={OpenModule}>Edit</Button>
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -37,15 +51,20 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
 
+  itemListContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+
   inputAddItem: {
-    width: 200,
-    borderBottomColor: "black",
-    borderBottomWidth: "1"
+    width: 200
   },
 
   ButtonAddItem: {
     marginLeft: 20,
     color: "yelow"
   },
-  listContainer:{ flex:3}
+
+  listContainer: { flex: 3 }
 });
