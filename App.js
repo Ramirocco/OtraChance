@@ -1,5 +1,5 @@
 import { Button, TextInput } from 'react-native-paper';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Modal, StyleSheet, Text, View } from 'react-native';
 
 import { useState } from 'react';
 
@@ -9,23 +9,28 @@ export default function App() {
   const [textItem, setTextItem] = useState('');
   //variante de la lista
   const [list, setList] = useState(["manzana", "pera", "zanahora"]);
+  //Modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [ItemSelected, setItemSelected] = useState('');
+  const AddToCart = () => { setList(list => [...list, textItem]), setTextItem("") };
+  const DeleteToList = () => { setList(list => [...list, textItem]), setTextItem("") };
 
-  //guardado del cambio de tipeo en el item
+  //guardado del cambio de tipeo en el item 
   const OnHandleChangeItem = e => { setTextItem(e) };
   //seteo de la lista, guardando valor anterior , mas el item actual y seteo el item en 0 para que no aparexca en el cuadro
   const AddToList = () => { setList(list => [...list, textItem]), setTextItem("") };
 
-  const OpenModule = () => { };
-  
+  const OpenModal = () => {setModalVisible(true);};
+
 
   {/*La data tiene la lista, esa lista esta compuesta por items, en la funcion RenderList da como parametro
         la data y desestructuras los items*/}
-  const RenderList = ({item})=> (
-  <View style={styles.itemListContainer}>
-    <Text style={styles.renderItem} >{item}</Text>
-    <Button icon="lead-pencil" mode="" onPress={OpenModule}>Edit</Button>
-  </View>
-);
+  const RenderList = ({ item }) => (
+    <View style={styles.itemListContainer}>
+      <Text style={styles.renderItem} >{item}</Text>
+      <Button icon="lead-pencil" mode="" onPress={OpenModal}>Edit</Button>
+    </View>
+  );
 
 
   return (
@@ -46,8 +51,17 @@ export default function App() {
         <FlatList
           data={list}
           keyExtractor={items => items.id}
-          renderItem={ RenderList } />
+          renderItem={RenderList} />
       </View>
+      
+      <Modal animationType="fade" transparent={true} modalVisible={modalVisible} >
+        <View style={styles.modalStyle}>
+          <Text></Text>
+          <Button icon="delete" mode="outlined" style={styles.ButtonAddItem} onPress={DeleteToList}>Delete</Button>
+          <Button icon="cart-check" mode="outlined" style={styles.ButtonAddItem} onPress={AddToCart}>Buyed</Button>
+        </View>
+      </Modal>
+      
     </View>
   );
 }
@@ -74,7 +88,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'white',
-    paddingHorizontal : 20,
+    paddingHorizontal: 20,
     width: 350,
     marginVertical: 5,
     marginBottom: 20,
@@ -82,9 +96,9 @@ const styles = StyleSheet.create({
     borderColor: "black",
     borderWidth: 2,
     shadowColor: "black",
-    shadowOpacity : 0.3,
-    shadowOffset: { width: 0, height: 8},
-    shadowRadius: 4, 
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 4,
     elevation: 2
   },
 
@@ -99,7 +113,19 @@ const styles = StyleSheet.create({
 
   listContainer: { flex: 3 },
 
-  renderItem:{ fontSize:20, 
-    fontStyle: "italic", 
-    textTransform: "uppercase"}
+  modalStyle: {
+    margin:20, 
+    backgroundColor:"white",
+    flex: 1,
+    alignItems: 'center',
+    borderColor: 'black',
+    borderWidth:1,
+    borderRadius: 60,
+    justifyContent: 'center'},
+
+  renderItem: {
+    fontSize: 20,
+    fontStyle: "italic",
+    textTransform: "uppercase"
+  }
 });
