@@ -1,49 +1,59 @@
 import { Button, TextInput } from 'react-native-paper';
 import { FlatList, Modal, StyleSheet, Text, View } from 'react-native';
 
+import { BsFillCartCheckFill } from 'react-icons/bs';
 import { useState } from 'react';
 
 export default function App() {
 
   //variante de cada item
   const [textItem, setTextItem] = useState('');
+  const [quantityItem, setquantityItem] = useState('');
+
   //variante de la lista
   const [list, setList] = useState([]);
   //Modal
   const [modalVisible, setModalVisible] = useState(false);
   const [ItemSelected, setItemSelected] = useState('');
-  const [wasBuyed, setwasBuyed] = useState(false);
-  const [IdProduct, setIdProduct] = useState()
+  const [IdProduct, setIdProduct] = useState();
+
   
-  const AddToCart = ()=> {list.map(item => {console.log(item);
-    item.name === ItemSelected ? { ...item, wasBuyed: true } : null;
-    console.log(item);
-    console.log(item.wasBuyed)}
-  ); return (item)};
+
+  const AddToCart = () => list.map(item => {
+
+    if (item.name === ItemSelected) {
+
+      item.iswasBuyed = true;
+      console.log(item)
+    };
+  })
+
 
   //revisar esto de arriba
-  const ChangeWasBuyed = ()=> setwasBuyed ( )
-  
-  const DeleteToList = item => { 
+  // const changeWasBuyed = (item) => setwasBuyed({ ...list, iswasBuyed: true })
+
+  const DeleteToList = item => {
     setList(list => list.filter(element => element.name !== item))
-    setModalVisible(false); };
+    setModalVisible(false);
+  };
 
   //guardado del cambio de tipeo en el item 
-  const OnHandleChangeItem = e =>  setTextItem(e) ;
+  const OnHandleChangeItem = e => setTextItem(e);
   //seteo de la lista, guardando valor anterior , mas el item actual y seteo el item en 0 para que no aparexca en el cuadro
-  const AddToList = () => { setIdProduct( list ? list.length + 2 : 1); setList(Prevlist => [...Prevlist, {name:textItem, wasBuyed: false , id: IdProduct} ]);setTextItem("")};
+  const AddToList = () => { setIdProduct(list ? list.length + 2 : 1); setList(Prevlist => [...Prevlist, { name: textItem, iswasBuyed: false, id: IdProduct }]); setTextItem("") };
 
-  const HandleModal = element => { 
+  const HandleModal = element => {
     setModalVisible(!modalVisible)
-    setItemSelected(element) }
+    setItemSelected(element)
+  }
 
   {/*La data tiene la lista, esa lista esta compuesta por items, en la funcion RenderList da como parametro
         la data y desestructuras los items*/}
   const RenderList = ({ item }) => (
     <View style={styles.itemListContainer}>
-      <Text style= { wasBuyed ? styles.renderItemBuyed : styles.renderItem } >{item.name}</Text>
+      <Text style={item.iswasBuyed ? styles.renderItemBuyed : styles.renderItem} >{item.name}  </Text>
       <Text>{item.id}</Text>
-      <Button icon="lead-pencil" mode="" onPress={ ()=>{HandleModal(item.name)} }>Edit</Button>
+      <Button icon="lead-pencil" mode="" onPress={() => { HandleModal(item.name) }}>Edit</Button>
     </View>
   );
 
@@ -52,6 +62,7 @@ export default function App() {
     <View style={styles.container}>
       <View style={styles.inputContainer}>
         <TextInput placeholder='Escriba producto' mode="flat" style={styles.inputAddItem} onChangeText={OnHandleChangeItem} value={textItem} />
+        <TextInput placeholder='Escriba cantidad a comprar' mode="flat" style={styles.inputAddItem} onChangeText={OnHandleChangeItem} value={quantityItem} />
         <Button icon="playlist-check" mode="outlined" style={styles.ButtonAddItem} onPress={AddToList}>Add</Button>
       </View >
       <View style={styles.listContainer}>
@@ -65,21 +76,23 @@ export default function App() {
         <FlatList
           data={list}
           keyExtractor={items => items.id}
-          renderItem={RenderList}/>
+          renderItem={RenderList} />
       </View>
       <Modal animationType="fade" transparent={true} visible={modalVisible} >
         <View style={styles.modalStyle}>
           <Text>¿Compraste o Deseas eliminar el producto "{ItemSelected}"?</Text>
-          
-          <Button icon="delete" mode="outlined" style={styles.ButtonAddItem} onPress={(item) => { 
+
+          <Button icon="delete" mode="outlined" style={styles.ButtonAddItem} onPress={(item) => {
             DeleteToList(ItemSelected)
-            setModalVisible(!modalVisible)}}>Delete</Button>
-            
-          <Button icon="cart-check" mode="outlined" style={styles.ButtonAddItem} onPress={()=> 
-            {AddToCart(ItemSelected)
-            setModalVisible(!modalVisible)}}>Buyed</Button>
-          
-          <Button icon="cart-check" mode="outlined" style={styles.ButtonAddItem} onPress={ HandleModal }>cerrar</Button>
+            setModalVisible(!modalVisible)
+          }}>Delete</Button>
+
+          <Button icon="cart-check" mode="outlined" style={styles.ButtonAddItem} onPress={() => {
+            AddToCart(ItemSelected)
+            setModalVisible(!modalVisible)
+          }}>Buyed</Button>
+
+          <Button icon="cart-check" mode="outlined" style={styles.ButtonAddItem} onPress={HandleModal}>cerrar</Button>
         </View>
       </Modal>
 
@@ -99,7 +112,8 @@ const styles = StyleSheet.create({
 
   inputContainer: {
     flex: 1,
-    flexDirection: 'row',
+    paddingTop:20,
+    flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
