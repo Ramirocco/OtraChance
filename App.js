@@ -1,7 +1,12 @@
-import { Button, TextInput } from 'react-native-paper';
-import { FlatList, Modal, StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
 
-import { BsFillCartCheckFill } from 'react-icons/bs';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+
+import { Button } from 'react-native-paper';
+import Inputs from './src/components/Inputs.js';
+import Modal from './src/components/Modal.js';
+import ModalTicket from './src/components/ModalTicket.js';
+import Ticket from './src/components/Ticket.js';
 import { useState } from 'react';
 
 export default function App() {
@@ -9,93 +14,95 @@ export default function App() {
   //variante de cada item
   const [textItem, setTextItem] = useState('');
   const [quantityItem, setquantityItem] = useState('');
+  const [QuantityTicketItem, setQuantityTicketItem] = useState();
 
   //variante de la lista
   const [list, setList] = useState([]);
+  const [ticket, setTicket] = useState([]);
+  const [ItemPrice, setItemPrice] = useState();
   //Modal
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalTicketVisible, setModalTicketVisible] = useState(false);
   const [ItemSelected, setItemSelected] = useState('');
-  const [IdProduct, setIdProduct] = useState();
+  const [IdProduct, setIdProduct] = useState(-1);
 
-  
-
+  const [selectedValue, setSelectedValue] = useState("")
+  //MODAL ABRE Y EXPORTA PROPS
   const AddToCart = () => list.map(item => {
-
     if (item.name === ItemSelected) {
-
       item.iswasBuyed = true;
-      console.log(item)
+      console.log(item);
+      AddToTicket(ItemSelected)
     };
   })
 
-
-  //revisar esto de arriba
-  // const changeWasBuyed = (item) => setwasBuyed({ ...list, iswasBuyed: true })
 
   const DeleteToList = item => {
     setList(list => list.filter(element => element.name !== item))
     setModalVisible(false);
   };
+  const DeleteToTicket = item => {
+    setTicket(Ticket => Ticket.filter(element => element.name !== item))
+    setModalVisible(false);
+  };
 
-  //guardado del cambio de tipeo en el item 
-  const OnHandleChangeItem = e => setTextItem(e);
   //seteo de la lista, guardando valor anterior , mas el item actual y seteo el item en 0 para que no aparexca en el cuadro
-  const AddToList = () => { setIdProduct(list ? list.length + 2 : 1); setList(Prevlist => [...Prevlist, { name: textItem, iswasBuyed: false, id: IdProduct }]); setTextItem("") };
+  const AddToList = () => { 
+    setIdProduct(list.length); 
+    console.log(list); 
+    setList(list => [...list, { name: textItem, iswasBuyed: false, id: IdProduct, quantityItem: quantityItem } ]); 
+    setTextItem(""); 
+    setquantityItem(""); 
+    console.log(list) };
 
   const HandleModal = element => {
     setModalVisible(!modalVisible)
     setItemSelected(element)
+  };
+  const HandleModalTicket = (ItemSelected )=> {
+    setModalTicketVisible(!modalTicketVisible)
+    setItemSelected(ItemSelected)
   }
+  //CIERRO MODAL
 
+
+  //guardado del cambio de tipeo en el item 
+  const OnHandleChangeItem = e => setTextItem(e);
+  const OnHandleChangeItemQuantity = e => setquantityItem(parseInt(e));
+
+  const OnHandleChangeBuyedPrice  = e => setPriceTicketItem(parseInt(e));
+  const OnHandleChangeBuyedQuantity = e => setQuantityTicketItem(parseInt(e));
+
+
+  const [PriceTicketItem, setPriceTicketItem] = useState()
+
+  
   {/*La data tiene la lista, esa lista esta compuesta por items, en la funcion RenderList da como parametro
         la data y desestructuras los items*/}
   const RenderList = ({ item }) => (
     <View style={styles.itemListContainer}>
       <Text style={item.iswasBuyed ? styles.renderItemBuyed : styles.renderItem} >{item.name}  </Text>
-      <Text>{item.id}</Text>
+      <Text>  Cant:{item.quantityItem}</Text>
       <Button icon="lead-pencil" mode="" onPress={() => { HandleModal(item.name) }}>Edit</Button>
     </View>
   );
 
+  const cantidad = "cantidad";
 
   return (
     <View style={styles.container}>
-      <View style={styles.inputContainer}>
-        <TextInput placeholder='Escriba producto' mode="flat" style={styles.inputAddItem} onChangeText={OnHandleChangeItem} value={textItem} />
-        <TextInput placeholder='Escriba cantidad a comprar' mode="flat" style={styles.inputAddItem} onChangeText={OnHandleChangeItem} value={quantityItem} />
-        <Button icon="playlist-check" mode="outlined" style={styles.ButtonAddItem} onPress={AddToList}>Add</Button>
-      </View >
+      <Text>Shopping List</Text>
+      <Inputs OnHandleChangeItem={OnHandleChangeItem} OnHandleChangeItemQuantity={OnHandleChangeItemQuantity} AddToList={AddToList} textItem={textItem} quantityItem={quantityItem} />
       <View style={styles.listContainer}>
-        {/* {list.map(item => (
-          <View style={styles.itemListContainer}>
-            <Text>{item}</Text>
-            <Button icon="lead-pencil" mode="" onPress={OpenModule}>Edit</Button>
-          </View>
-        ))} */}
         {/*FlatList hace un .map a partir del "data", por eso se pone "item" que es es cada elemento del list o "data"*/}
         <FlatList
           data={list}
-          keyExtractor={items => items.id}
+          keyExtractor={items => items.name}
           renderItem={RenderList} />
       </View>
-      <Modal animationType="fade" transparent={true} visible={modalVisible} >
-        <View style={styles.modalStyle}>
-          <Text>¿Compraste o Deseas eliminar el producto "{ItemSelected}"?</Text>
-
-          <Button icon="delete" mode="outlined" style={styles.ButtonAddItem} onPress={(item) => {
-            DeleteToList(ItemSelected)
-            setModalVisible(!modalVisible)
-          }}>Delete</Button>
-
-          <Button icon="cart-check" mode="outlined" style={styles.ButtonAddItem} onPress={() => {
-            AddToCart(ItemSelected)
-            setModalVisible(!modalVisible)
-          }}>Buyed</Button>
-
-          <Button icon="cart-check" mode="outlined" style={styles.ButtonAddItem} onPress={HandleModal}>cerrar</Button>
-        </View>
-      </Modal>
-
+      <Ticket ticket={ticket} />
+      <ModalTicket setItemPrice={setItemPrice} OnHandleChangeBuyedQuantity={OnHandleChangeBuyedQuantity} OnHandleChangeBuyedPrice={OnHandleChangeBuyedPrice} ItemPrice={ItemPrice}  setModalTicketVisible={setModalTicketVisible} setItemPrice={setItemPrice}  ticket={ticket} modalTicketVisible={modalTicketVisible}  HandleModalTicket={HandleModalTicket} DeleteToTicket={DeleteToTicket}  ItemSelected={ItemSelected} setTicket={setTicket} QuantityTicketItem={QuantityTicketItem}  PriceTicketItem={PriceTicketItem} />
+      <Modal setModalVisible={setModalVisible} ItemSelected={ItemSelected} AddToCart={AddToCart} DeleteToList={DeleteToList} modalVisible={modalVisible} HandleModal={HandleModal} HandleModalTicket={HandleModalTicket}/>
     </View>
   );
 }
@@ -110,12 +117,12 @@ const styles = StyleSheet.create({
     paddingTop: 10
   },
 
-  inputContainer: {
-    flex: 1,
-    paddingTop:20,
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+
+  listStyle: {
+    backgroundColor: "yellow",
+    width: 50,
+    padding: 0,
+    margin: 0
   },
 
   itemListContainer: {
@@ -136,35 +143,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2
   },
-
-  inputAddItem: {
-    width: 200
-  },
-
-  ButtonAddItem: {
-    marginLeft: 20,
-    color: "yelow"
-  },
-
   listContainer: { flex: 3 },
-
-  modalStyle: {
-    margin: 30,
-    backgroundColor: "white",
-    flex: 1,
-    alignItems: 'center',
-    borderColor: 'black',
-    borderWidth: 1,
-    borderRadius: 60,
-    justifyContent: 'center'
-  },
-
   renderItem: {
     fontSize: 20,
     fontStyle: "italic",
     textTransform: "uppercase"
   },
-
   renderItemBuyed: {
     fontSize: 20,
     fontStyle: "italic",
